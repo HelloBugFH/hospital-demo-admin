@@ -13,10 +13,13 @@ import per.hp.hospital.common.result.Result;
 import per.hp.hospital.common.result.ResultCodeEnum;
 import per.hp.hospital.model.hosp.Department;
 import per.hp.hospital.model.hosp.Hospital;
+import per.hp.hospital.model.hosp.Schedule;
 import per.hp.hospital.service.DepartmentService;
 import per.hp.hospital.service.HospitalService;
 import per.hp.hospital.service.HospitalSetService;
+import per.hp.hospital.service.ScheduleService;
 import per.hp.hospital.vo.hosp.DepartmentQueryVo;
+import per.hp.hospital.vo.hosp.ScheduleQueryVo;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -33,6 +36,46 @@ public class ApiController {
     @Autowired
     DepartmentService departmentService;
 
+    @Autowired
+    private ScheduleService scheduleService;
+
+    // 删除排班
+    @PostMapping("schedule/remove")
+    public Result removeSchedule(HttpServletRequest request) {
+        Map paramMap = checkSign(request);
+        String hoscode = (String) paramMap.get("hoscode");
+        String hosScheduleId = (String) paramMap.get("hosScheduleId");
+
+        scheduleService.remove(hoscode,hosScheduleId);
+        return Result.ok();
+    }
+
+    // 查询排班
+    @PostMapping("schedule/list")
+    public Result schedule(HttpServletRequest request){
+        Map paramMap = checkSign(request);
+        String hoscode = (String) paramMap.get("hoscode");
+        String depcode = (String)paramMap.get("depcode");
+
+        int page = StringUtils.isEmpty(paramMap.get("page")) ? 1 : Integer.parseInt((String) paramMap.get("page"));
+        int limit = StringUtils.isEmpty(paramMap.get("limit")) ? 1 : Integer.parseInt((String) paramMap.get("limit"));
+
+        ScheduleQueryVo scheduleQueryVo = new ScheduleQueryVo();
+        scheduleQueryVo.setHoscode(hoscode);
+        scheduleQueryVo.setDepcode(depcode);
+        Page<Schedule> departmentPage = scheduleService.selectPage(page, limit, scheduleQueryVo);
+        return Result.ok(departmentPage);
+    }
+
+    // 上传排班接口
+    @PostMapping("saveSchedule")
+    public Result saveSchedule(HttpServletRequest request){
+        Map paramMap = checkSign(request);
+        scheduleService.save(paramMap);
+        return Result.ok();
+    }
+
+    // 删除科室
     @PostMapping("department/remove")
     public Result removeDepartment(HttpServletRequest request) {
         Map paramMap = checkSign(request);
@@ -41,7 +84,6 @@ public class ApiController {
         departmentService.remove(hoscode,depcode);
         return Result.ok();
     }
-
 
     // 查询科室接口
     @PostMapping("department/list")

@@ -30,9 +30,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         Department department_exist = departmentRepository.getDepartmentByHoscodeAndDepcode(department.getHoscode(), department.getDepcode());
 
         if (department_exist != null) {
-            department.setUpdateTime(new Date());
-            department.setIsDeleted(0);
-            departmentRepository.save(department);
+            department_exist.setUpdateTime(new Date());
+            department_exist.setIsDeleted(0);
+            departmentRepository.save(department_exist);
         } else {
             department.setCreateTime(new Date());
             department.setUpdateTime(new Date());
