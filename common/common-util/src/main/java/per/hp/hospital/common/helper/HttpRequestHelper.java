@@ -2,7 +2,7 @@ package per.hp.hospital.common.helper;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import per.hp.hospital.common.HttpUtil;
+import per.hp.hospital.common.utils.HttpUtil;
 import per.hp.hospital.common.MD5;
 
 import java.util.Date;

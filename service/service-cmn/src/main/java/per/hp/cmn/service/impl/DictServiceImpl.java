@@ -3,7 +3,10 @@ package per.hp.cmn.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import per.hp.cmn.listener.DictListener;
@@ -18,10 +21,13 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 @Service
+@Slf4j
 public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements DictService {
     //根据数据id查询子数据列表
+    @Cacheable(value = "dict",keyGenerator = "keyGenerator")
     @Override
     public List<Dict> findChildrenData(Long id) {
+//        log.info("执行数据拉取！！");
         QueryWrapper<Dict> wrapper = new QueryWrapper<>();
         wrapper.eq("parent_id",id);
         List<Dict> dictList = baseMapper.selectList(wrapper);
@@ -67,6 +73,7 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
     }
 
     //导入数据字典
+    @CacheEvict(value = "dict", allEntries=true)
     @Override
     public void importDictData(MultipartFile file) {
         try {
