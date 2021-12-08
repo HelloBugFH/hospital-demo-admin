@@ -8,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import per.hp.cmn.listener.DictListener;
 import per.hp.cmn.mapper.DictMapper;
@@ -27,7 +28,7 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
     @Cacheable(value = "dict",keyGenerator = "keyGenerator")
     @Override
     public List<Dict> findChildrenData(Long id) {
-//        log.info("执行数据拉取！！");
+        //        log.info("执行数据拉取！！");
         QueryWrapper<Dict> wrapper = new QueryWrapper<>();
         wrapper.eq("parent_id",id);
         List<Dict> dictList = baseMapper.selectList(wrapper);
@@ -54,7 +55,7 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
         try {
             response.setContentType("application/vnd.ms-excel");
             response.setCharacterEncoding("utf-8");
-// 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+            // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
             String fileName = URLEncoder.encode("数据字典", "UTF-8");
             response.setHeader("Content-disposition", "attachment;filename="+ fileName + ".xlsx");
 
@@ -81,6 +82,42 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public String getDicName(String dicCode, String value) {
+        // dicCode为空根据value进行查询
+        if (StringUtils.isEmpty(dicCode)){
+            QueryWrapper<Dict> wrapper = new QueryWrapper<>();
+            wrapper.eq("value",value);
+            Dict dict = baseMapper.selectOne(wrapper);
+            return dict.getName();
+        }else {
+            // dicCode不为空，使用两个值进行查询
+            Dict dict = this.getDictByDicCode(dicCode);
+            Long id = dict.getId();
+            Dict dictByDicCode = baseMapper.selectOne(new QueryWrapper<Dict>()
+                    .eq("parent_id", id)
+                    .eq("value", value));
+            return dictByDicCode.getName();
+        }
+    }
+
+    @Override
+    public List<Dict> findByDictCode(String dictCode) {
+        // 根据dicCode获取省分类id
+        Dict dict = this.getDictByDicCode(dictCode);
+        Long id = dict.getId();
+        List<Dict> dictList = this.findChildrenData(id);
+        // 获取省分类下的子节点
+        return dictList;
+    }
+
+    private Dict getDictByDicCode(String dicCode){
+        QueryWrapper<Dict> wrapper = new QueryWrapper<>();
+        wrapper.eq("dict_code",dicCode);
+        Dict dict = baseMapper.selectOne(wrapper);
+        return dict;
     }
 
 
