@@ -3,7 +3,9 @@ package per.hp.hospital.service;
 import org.springframework.data.domain.Page;
 import per.hp.hospital.model.hosp.Department;
 import per.hp.hospital.vo.hosp.DepartmentQueryVo;
+import per.hp.hospital.vo.hosp.DepartmentVo;
 
+import java.util.List;
 import java.util.Map;
 
 public interface DepartmentService {
@@ -29,6 +31,9 @@ public interface DepartmentService {
      */
     void remove(String hoscode, String depcode);
 
+    //根据医院编号，查询医院所有科室列表
+    List<DepartmentVo> findDeptTree(String hoscode);
 
 
+    String getDepName(String hoscode, String depcode);
 }

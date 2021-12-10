@@ -25,4 +25,5 @@ public interface HospitalService {
      */
     Map<String, Object> show(String id);
 
+    String getHospitalName(String hoscode);
 }
